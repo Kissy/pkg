@@ -7,7 +7,10 @@ replace github.com/fluxcd/pkg/apis/meta => ../apis/meta
 require (
 	github.com/fluxcd/pkg/apis/meta v0.9.0
 	github.com/go-logr/logr v0.3.0
+	github.com/google/go-cmp v0.5.2
 	github.com/hashicorp/go-retryablehttp v0.6.8
+	github.com/onsi/gomega v1.10.2
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
