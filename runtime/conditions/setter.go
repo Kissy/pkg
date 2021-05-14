@@ -79,9 +79,9 @@ func Set(to Setter, condition *metav1.Condition) {
 // TrueCondition returns a condition with Status=True and the given type.
 func TrueCondition(t, reason, messageFormat string, messageArgs ...interface{}) *metav1.Condition {
 	return &metav1.Condition{
-		Type:   t,
-		Status: metav1.ConditionTrue,
-		Reason: reason,
+		Type:    t,
+		Status:  metav1.ConditionTrue,
+		Reason:  reason,
 		Message: fmt.Sprintf(messageFormat, messageArgs...),
 	}
 }
@@ -89,10 +89,10 @@ func TrueCondition(t, reason, messageFormat string, messageArgs ...interface{}) 
 // FalseCondition returns a condition with Status=False and the given type.
 func FalseCondition(t, reason, messageFormat string, messageArgs ...interface{}) *metav1.Condition {
 	return &metav1.Condition{
-		Type:     t,
-		Status:   metav1.ConditionFalse,
-		Reason:   reason,
-		Message:  fmt.Sprintf(messageFormat, messageArgs...),
+		Type:    t,
+		Status:  metav1.ConditionFalse,
+		Reason:  reason,
+		Message: fmt.Sprintf(messageFormat, messageArgs...),
 	}
 }
 
