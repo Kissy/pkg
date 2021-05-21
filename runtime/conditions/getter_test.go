@@ -247,6 +247,7 @@ func TestAggregate(t *testing.T) {
 		name string
 		from []Getter
 		t    string
+		opts []MergeOption
 		want *metav1.Condition
 	}{
 		{
@@ -255,7 +256,7 @@ func TestAggregate(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "Returns foo condition with the aggregation of object's ready conditions",
+			name: "Returns foo condition with an aggregation of the object's top group conditions",
 			from: []Getter{
 				getterWithConditions(ready1),
 				getterWithConditions(ready1),
@@ -264,7 +265,67 @@ func TestAggregate(t *testing.T) {
 				getterWithConditions(bar),
 			},
 			t:    "foo",
-			want: FalseCondition("foo", "reason false1", "2 of 5 completed"),
+			want: FalseCondition("foo", "reason false1", "message false1"),
+		},
+		{
+			name: "Returns foo condition with the aggregation of object's subset conditions",
+			from: []Getter{
+				getterWithConditions(ready1),
+				getterWithConditions(ready1),
+				getterWithConditions(ready2, bar),
+				getterWithConditions(),
+				getterWithConditions(bar),
+			},
+			opts: []MergeOption{
+				WithConditions("bar"),
+			},
+			t:    "foo",
+			want: FalseCondition("foo", "reason falseBar1", "message falseBar1"),
+		},
+		{
+			name: "Returns foo condition with the aggregation of object's subset priority conditions",
+			from: []Getter{
+				getterWithConditions(ready1),
+				getterWithConditions(ready1),
+				getterWithConditions(ready2, bar),
+				getterWithConditions(),
+				getterWithConditions(bar),
+			},
+			opts: []MergeOption{
+				WithConditions("bar", meta.ReadyCondition),
+			},
+			t:    "foo",
+			want: FalseCondition("foo", "reason falseBar1", "message falseBar1"),
+		},
+		{
+			name: "Returns foo condition with the aggregation of object's subset priority conditions (inverse)",
+			from: []Getter{
+				getterWithConditions(ready1),
+				getterWithConditions(ready1),
+				getterWithConditions(ready2, bar),
+				getterWithConditions(),
+				getterWithConditions(bar),
+			},
+			opts: []MergeOption{
+				WithConditions(meta.ReadyCondition, "bar"),
+			},
+			t:    "foo",
+			want: FalseCondition("foo", "reason false1", "message false1"),
+		},
+		{
+			name: "Returns foo condition with source ref",
+			from: []Getter{
+				getterWithConditions(ready1),
+				getterWithConditions(ready1),
+				getterWithConditions(ready2, bar),
+				getterWithConditions(),
+				getterWithConditions(bar),
+			},
+			opts: []MergeOption{
+				WithSourceRefIf(meta.ReadyCondition),
+			},
+			t:    "foo",
+			want: FalseCondition("foo", "reason false1 @ /", "message false1"),
 		},
 	}
 
@@ -272,7 +333,7 @@ func TestAggregate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
 
-			got := aggregate(tt.from, tt.t)
+			got := aggregate(tt.from, tt.t, tt.opts...)
 			if tt.want == nil {
 				g.Expect(got).To(BeNil())
 				return
